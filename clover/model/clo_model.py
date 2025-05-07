@@ -91,6 +91,7 @@ class CloModel(nn.Module):
 
         try:
             from huggingface_hub import hf_hub_download
+            local_file_path = hf_hub_download(ea_model_path, "config.json")
             local_file_path = hf_hub_download(ea_model_path, "model.safetensors")
             ea_model_path = os.path.dirname(local_file_path)
         except:
