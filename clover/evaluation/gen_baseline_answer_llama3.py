@@ -34,7 +34,7 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True  
     torch.backends.cudnn.benchmark = False 
 
-def ea_forward(input_ids, model, tokenizer, tree_choices, logits_processor=None, max_steps=2048):
+def ea_forward(input_ids, model, tokenizer, tree_choices, logits_processor=None, max_steps=2048, max_length=-1):
     assert input_ids.shape[0] == 1, "Only support batch size 1 for now!!"
     # Avoid modifying the input_ids in-place
     input_ids = input_ids.clone()
@@ -85,17 +85,23 @@ def ea_forward(input_ids, model, tokenizer, tree_choices, logits_processor=None,
         else:
             input_id = outputs.logits[:, -1:].argmax(dim=-1)
         outputs, _ = model.base_model(input_id, use_cache=True, past_key_values=past_key_values)
+
+        if hasattr(model, 'timer'): model.timer._hist['bonus tokens'].append(input_id.shape[-1] - 1)
         input_ids = torch.cat([input_ids, input_id], dim=-1)
+
+        yield input_ids[0, input_len:].tolist()
 
         if stop_token_id in input_ids[0, input_len:].tolist():
             break
         if tokenizer.eos_token_id in input_ids[0, input_len:].tolist():
             break
-        if new_token > 1024:
+        #if new_token > 1024:
+        #    break
+        #if input_ids.shape[1] > 1960:
+        #    break
+        if input_ids.shape[1] > max_length:
             break
-        if input_ids.shape[1] > 1960:
-            break
-    return input_ids, new_token, idx
+    #return input_ids, new_token, idx
 
 
 def run_eval(

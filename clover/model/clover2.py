@@ -573,6 +573,7 @@ class Clover2Model(nn.Module):
             param.requires_grad = False
 
         def load_tensor(path, name, vocab_truncate=False):
+            #return name
             from safetensors import safe_open
             import json
             try:
@@ -614,7 +615,6 @@ class Clover2Model(nn.Module):
         self.clover_embed_tokens = nn.Embedding(
                 config.vocab_size, config.hidden_size, config.pad_token_id#, dtype=config.torch_dtype
             )
-        # self.init_with_data("clover_embed_tokens", load_tensor(path, f"model.embed_tokens.weight", vocab_truncate=True), self.clover_embed_tokens.weight)
 
         for param in self.clover_embed_tokens.parameters():
             param.requires_grad = False
@@ -625,6 +625,10 @@ class Clover2Model(nn.Module):
         # base_model = AutoModelForCausalLM.from_pretrained(path).model
         # baseconfig = AutoConfig.from_pretrained(path)
         base_layer = LlamaDecoderLayer(config,1)
+
+        #from transformers import AutoModel
+        #self.base_tensor = AutoModel.from_pretrained(path, trust_remote_code=True, device_map="cpu")
+
         self.init_with_data("base_layer.self_attn.q_proj", load_tensor(path, f"model.layers.{config.num_hidden_layers-1}.self_attn.q_proj.weight"), base_layer.self_attn.q_proj.weight)
         self.init_with_data("base_layer.self_attn.k_proj", load_tensor(path, f"model.layers.{config.num_hidden_layers-1}.self_attn.k_proj.weight"), base_layer.self_attn.k_proj.weight)
         self.init_with_data("base_layer.self_attn.v_proj", load_tensor(path, f"model.layers.{config.num_hidden_layers-1}.self_attn.v_proj.weight"), base_layer.self_attn.v_proj.weight)
