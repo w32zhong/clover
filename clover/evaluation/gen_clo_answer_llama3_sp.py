@@ -115,6 +115,9 @@ def ea_forward(input_ids, model, tokenizer, tree_choices, logits_processor=None,
             hidden_state_new,
             sample_p
         )
+
+        yield input_ids[0, input_len:].tolist()
+
         if stop_token_id in input_ids[0, input_len:].tolist():
             break
         if tokenizer.eos_token_id in input_ids[0, input_len:].tolist():
