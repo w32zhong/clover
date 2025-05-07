@@ -582,6 +582,12 @@ class Clover2Model(nn.Module):
             except:
                 pass
             try:
+                from huggingface_hub import hf_hub_download
+                local_file_path = hf_hub_download(path, "pytorch_model.bin.index.json")
+                path = os.path.dirname(local_file_path)
+            except:
+                pass
+            try:
                 with open(os.path.join(path,"model.safetensors.index.json"),"r") as f:
                     index_json=json.loads(f.read())
                     #print(f"index_json:{index_json} {name}")
