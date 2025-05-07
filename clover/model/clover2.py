@@ -576,6 +576,12 @@ class Clover2Model(nn.Module):
             from safetensors import safe_open
             import json
             try:
+                from huggingface_hub import hf_hub_download
+                local_file_path = hf_hub_download(path, "model.safetensors.index.json")
+                path = os.path.dirname(local_file_path)
+            except:
+                pass
+            try:
                 with open(os.path.join(path,"model.safetensors.index.json"),"r") as f:
                     index_json=json.loads(f.read())
                     #print(f"index_json:{index_json} {name}")
@@ -901,13 +907,13 @@ class Clover2Model(nn.Module):
                     else:
                         # print(f"init weight {name} {base.size()} {new_base.size()}")
                         to.data[:] = fn(base).data[:].to(to.data.dtype)
-                    print(f"Gathered init weight {name} {to.data}")
+                    #print(f"Gathered init weight {name} {to.data}")
         else:
             if fn is None:
                 to.data[:] = base.data[:].to(to.data.dtype)
             else:
                 to.data[:] = fn(base).data[:].to(to.data.dtype)
-            print(f"init weight {name} {to.data}")
+            #print(f"init weight {name} {to.data}")
 
     @classmethod
     def init_with_data(cls, name, data, to, fn=None):
@@ -917,10 +923,10 @@ class Clover2Model(nn.Module):
             from deepspeed.runtime.zero import GatheredParameters
             with GatheredParameters(to, modifier_rank=0):
                 to.data[:] = data.to(to.dtype)
-                print(f"Gathered init weight {name} {data.dtype} {to.data}")
+                #print(f"Gathered init weight {name} {data.dtype} {to.data}")
         else:
             to.data[:] = data.to(to.dtype)
-            print(f"init weight {name} {to.data}")
+            #print(f"init weight {name} {to.data}")
             
     @classmethod
     def init_with_method(cls, name, to, method, **kwargs):
@@ -931,10 +937,10 @@ class Clover2Model(nn.Module):
 
             with GatheredParameters(to, modifier_rank=0):
                 method(to.data, **kwargs)
-                print(f"Gathered init weight {name} {to.data}")
+                #print(f"Gathered init weight {name} {to.data}")
         else:
             method(to.data, **kwargs)
-            print(f"init weight {name} {to.data}")
+            #print(f"init weight {name} {to.data}")
 
     @classmethod
     def eye_with_uniform(cls, tensor, b):

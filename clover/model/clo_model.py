@@ -89,6 +89,13 @@ class CloModel(nn.Module):
                 base_model_path, **kwargs
             )
 
+        try:
+            from huggingface_hub import hf_hub_download
+            local_file_path = hf_hub_download(ea_model_path, "model.safetensors")
+            ea_model_path = os.path.dirname(local_file_path)
+        except:
+            pass
+
         configpath=os.path.join(ea_model_path, "config.json")
         if not os.path.exists(configpath):
             configpath = hf_hub_download(ea_model_path, "config.json")
